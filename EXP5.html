@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<pre>
+
+# Import libraries
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+
+# Load dataset
+df = pd.read_csv('/content/Titanic-Dataset.csv')
+
+# Drop unnecessary columns
+df.drop(['Name', 'Ticket', 'Cabin'], axis=1, inplace=True)
+df
+# These columns are dropped because:
+#  - 'Name' → textual and unique (not useful for ML)
+#  - 'Ticket' → also unique identifiers
+#  - 'Cabin' → many missing values, not very informative
+
+
+# Identify categorical columns
+categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+print("Categorical columns before encoding:", categorical_cols)
+
+# Encode categorical columns
+le = LabelEncoder()
+for col in categorical_cols:      # Loop through each categorical column
+    df[col] = df[col].fillna('Missing')  # Replace missing values with 'Missing' label
+    df[col] = le.fit_transform(df[col])  # Convert text categories into numbers
+
+
+
+df.head()
+
+
+
+
+
+
+	</pre>
+
+</body>
+</html>

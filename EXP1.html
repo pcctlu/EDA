@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<pre>
+
+
+import pandas as pd
+
+#Read the dataset into pandas DataFrame
+df=pd.read_csv("/content/Titanic-Dataset.csv")
+df
+
+# View the first 5 rows
+df.head()
+
+# View the last 5 rows
+df.tail()
+
+
+# Access a specific row/column using loc[]
+df.loc[0]
+
+df.loc[0, 'Name'] # Name column of first row
+
+# Access a specific row/column using iloc[]
+df.iloc[0]
+
+df.iloc[0, 3] # 4th column of first row
+
+# summary of dataset
+df.info()
+
+# statistical summary of numerical columns
+df.describe()
+
+#number of rows and columns
+df.shape
+
+
+
+
+
+
+
+	</pre>
+
+</body>
+</html>

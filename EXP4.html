@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<pre>
+
+import pandas as pd          
+import numpy as np
+import seaborn as sns 
+import matplotlib.pyplot as plt  # For plotting graphs
+
+
+df = pd.read_csv("/content/synthetic_dataset.csv")  
+df.head()
+
+
+df.isnull().sum()    # Shows the count of missing (NaN) values in each column
+df.duplicated().sum()  # Counts how many duplicate rows are present in the dataset
+
+# ------------------------------------------------------------
+# Handle Missing Values
+# ------------------------------------------------------------
+
+# Fill missing values in 'Category' column with the mode (most frequent value)
+mode_category = df['Category'].mode()[0]
+df['Category'] = df['Category'].fillna(mode_category)
+
+# Fill missing values in 'Price' column with mean (average value)
+mean_price = df['Price'].mean()
+df['Price'] = df['Price'].fillna(mean_price)
+
+# Fill missing values in 'Rating' column with median (middle value)
+median_rating = df['Rating'].median()
+df['Rating'] = df['Rating'].fillna(median_rating)
+
+# Fill missing values in 'Stock' column with 'Unknown'
+df['Stock'] = df['Stock'].fillna('Unknown')
+
+# Fill missing values in 'Discount' column with 0
+df['Discount'] = df['Discount'].fillna(0)
+
+# Print confirmation after handling missing values
+print("\nAfter handling missing values:\n", df.isnull().sum())
+
+
+# Handle Duplicate Records
+
+df_before = df.shape[0]    # Count number of rows before dropping duplicates
+df = df.drop_duplicates()  # Remove duplicate rows
+df_after = df.shape[0]     # Count number of rows after dropping duplicates
+print(f"\nRemoved {df_before - df_after} duplicate rows.")  # Show how many were removed
+
+
+# Clean 'Stock' column
+# (In case of inconsistent capitalization or spelling variations)
+
+df['Stock'] = df['Stock'].replace({
+    'In Stock': 'In Stock',
+    'Out of Stock': 'Out of Stock',
+    'Unknown': 'Unknown'
+})
+# This ensures all Stock entries follow a uniform naming convention
+
+
+# Handle Outliers in 'Price' column
+
+
+# Calculate 99th percentile (upper bound for valid prices)
+upper_price = df['Price'].quantile(0.99)
+
+# Filter rows — keep only those with Price <= 99th percentile
+df = df[df['Price'] <= upper_price]
+
+
+# Save Cleaned Dataset
+
+df.to_csv("synthetic_dataset_cleaned.csv", index=False)  # Save cleaned data without index column
+print("Cleaned dataset saved as: synthetic_dataset_cleaned.csv")
+
+# Reload dataset (to confirm saving worked)
+
+df.head()  # View first few rows
+df = pd.read_csv("synthetic_dataset_cleaned.csv")  # Reload cleaned data
+df.head()
+
+
+# Double-check for any remaining duplicates
+
+print(df.duplicated().sum())  # Count duplicates
+df = df.drop_duplicates()     # Remove if any found
+print("Duplicates removed. Current shape:", df.shape)
+
+# Visualize Outliers for Numerical Columns
+
+numerical_cols = ['Price', 'Rating', 'Discount']
+
+# Loop through each numeric column and draw a boxplot
+for col in numerical_cols:
+    plt.figure(figsize=(6,4))
+    sns.boxplot(y=df[col])
+    plt.title(f'Boxplot of {col}')  # Title shows which column is being plotted
+    plt.show()
+
+
+print(df.shape)     # Displays total rows and columns
+df.describe()       # Shows summary stats (count, mean, std, min, max, quartiles)
+
+
+
+
+
+
+
+	</pre>
+
+</body>
+</html>

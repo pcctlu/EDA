@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<pre>
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load dataset
+df = pd.read_csv('/content/Iris.csv')
+df.head()
+
+# Check missing values count in each column
+print(df.isnull().sum())
+
+#visualize missing values as a heatmap
+plt.figure(figsize=(8,6))
+sns.heatmap(df.isnull(), cbar=False, cmap='viridis')
+plt.title("Missing Values Heatmap")
+plt.show()
+
+
+numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns
+
+
+# Summary statistics
+print(df[numerical_cols].describe())
+
+# Histograms of numerical features
+df[numerical_cols].hist(figsize=(12,10), bins=30)
+plt.suptitle("Histograms of Numerical Variables")
+plt.show()
+
+# Select categorical columns
+categorical_cols = df.select_dtypes(include=['object', 'category']).columns
+
+# Frequency counts
+for col in categorical_cols:
+    print(f"Value counts for {col}:\n{df[col].value_counts()}\n")
+
+# Bar plots of categorical features
+for col in categorical_cols:
+    plt.figure(figsize=(6,4))
+    sns.countplot(x=col, data=df)
+    plt.title(f"Frequency of Categories in {col}")
+    plt.xticks(rotation=45)
+    plt.show()
+
+# Define numerical columns
+numerical_cols = ['SepalLengthCm', 'SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm']
+
+# Correlation heatmap for numerical variables
+plt.figure(figsize=(10,8))
+sns.heatmap(df[numerical_cols].corr(), annot=True, cmap='coolwarm')
+plt.title("Correlation Heatmap of Numerical Variables")
+plt.show()
+
+# Boxplot for Numerical vs. Categorical
+
+sns.boxplot(x='Species', y='SepalLengthCm', data=df)
+plt.title("Sepal Length vs Species")
+plt.show()
+
+	</pre>
+
+</body>
+</html>

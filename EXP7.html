@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<pre>
+
+# Step 1: Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.decomposition import PCA
+from scipy.stats import skew
+%matplotlib inline
+
+# Step 2: Load Dataset
+from sklearn.datasets import load_iris
+iris = load_iris()
+df = pd.DataFrame(iris.data, columns=iris.feature_names)
+
+print(" Dataset Shape:", df.shape)
+print(df.head())
+
+# Step 3: Check for Skewness before Scaling
+print("\nSkewness before scaling:")
+print(df.apply(lambda x: skew(x)))           # Calculate skewness of each numeric column
+
+# Skewness tells if data is symmetric (≈0), right-skewed (>0), or left-skewed (<0)
+
+# Step 4: Visualize Distributions before Scaling
+df.hist(figsize=(10,6), bins=15, color='skyblue', edgecolor='black')
+plt.suptitle("Before Feature Scaling", fontsize=16)
+plt.show()
+
+
+# Step 5: Feature Scaling
+scaler = StandardScaler()                      # Initialize the StandardScaler
+df_scaled = pd.DataFrame(                      # Fit and transform data, then convert to DataFrame
+    scaler.fit_transform(df), 
+    columns=df.columns
+)
+
+# Step 6: Check Skewness after Scaling
+print("\nSkewness after scaling:")
+print(df_scaled.apply(lambda x: skew(x)))
+
+# Step 7: Visualize Distributions after Scaling
+df_scaled.hist(figsize=(10,6), bins=15, color='lightgreen', edgecolor='black')
+plt.suptitle("After Feature Scaling", fontsize=16)
+plt.show()
+
+
+# Step 8: Dimensionality Reduction using PCA
+pca = PCA(n_components=2)                           # Create PCA model to reduce data to 2 components
+
+
+# Apply PCA before and after scaling
+pca_before = PCA(n_components=2).fit_transform(df)   # Perform PCA on unscaled data
+pca_after = PCA(n_components=2).fit_transform(df_scaled)  # Perform PCA on scaled data
+
+# Step 9: Scatter Plot - Before and After Scaling
+plt.figure(figsize=(12,5))
+
+plt.subplot(1,2,1)
+plt.scatter(pca_before[:,0], pca_before[:,1], c=iris.target, cmap='viridis')
+plt.title("PCA before Scaling")
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+
+plt.subplot(1,2,2)
+plt.scatter(pca_after[:,0], pca_after[:,1], c=iris.target, cmap='viridis')
+plt.title("PCA after Scaling")
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+
+plt.tight_layout()
+plt.show()
+
+
+	</pre>
+
+</body>
+</html>

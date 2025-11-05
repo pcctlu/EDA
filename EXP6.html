@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<pre>
+
+# Imports
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+
+import seaborn as sns
+titanic = sns.load_dataset('titanic')
+print("Loaded seaborn Titanic dataset.")
+
+titanic.head()
+
+## Merging Example
+
+# Create passenger details DataFrame with selected columns
+passenger_details = titanic.reset_index().rename(columns={'index':'passenger_id'})[['passenger_id','age','sex','pclass']]
+
+# reset_index() creates a new numeric index column, which we rename to 'passenger_id'
+
+# Create ticket_type list matching dataset length
+ticket_types = (['A','B','C'] * ((len(passenger_details)//3)+1))[:len(passenger_details)]
+
+# Create tickets DataFrame
+passenger_tickets = pd.DataFrame({
+    'passenger_id': passenger_details['passenger_id'].sample(frac=1.0, random_state=42).tolist(),
+    'ticket_type': ticket_types
+})
+
+# Merge
+
+merged = pd.merge(passenger_details, passenger_tickets, on='passenger_id', how='inner')
+merged.head()
+
+## Concatenation Example
+# Split into two halves and concatenate back
+part1 = titanic.iloc[:int(len(titanic)/2)].copy()
+part2 = titanic.iloc[int(len(titanic)/2):].copy()
+
+concatenated = pd.concat([part1, part2], axis=0).reset_index(drop=True)
+concatenated.shape
+
+## Data Cleaning
+# Fill missing age with median, drop missing target rows
+
+if 'age' in titanic.columns:
+    titanic['age'] = titanic['age'].fillna(titanic['age'].median())
+
+if 'survived' in titanic.columns:
+    titanic = titanic.dropna(subset=['survived'])
+
+titanic.isnull().sum()
+
+## Preprocessing
+TARGET = 'survived'
+FEATURES = ['pclass','sex','age','sibsp','parch','fare']
+FEATURES = [f for f in FEATURES if f in titanic.columns]
+
+X = titanic[FEATURES].copy()
+y = titanic[TARGET].astype(int)
+
+# Encode sex
+if 'sex' in X.columns:
+    X['sex'] = X['sex'].map({'male':0,'female':1}).fillna(0).astype(int)
+
+# Fill and scale
+X = X.fillna(X.median(numeric_only=True))
+
+scaler = StandardScaler()
+
+num_cols = X.select_dtypes(include=[np.number]).columns.tolist()
+
+X[num_cols] = scaler.fit_transform(X[num_cols])
+
+X.head()
+
+## Train-Test Split and Model Training
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y
+)
+
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+acc = accuracy_score(y_test, y_pred)
+print("Accuracy:", acc)
+print(classification_report(y_test, y_pred))
+
+	</pre>
+
+</body>
+</html>

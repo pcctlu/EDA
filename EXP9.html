@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<pre>
+
+import numpy as np
+import pandas as pd
+from statsmodels.tsa.arima.model import ARIMA
+import matplotlib.pyplot as plt
+
+#Generate a small synthetic time series dataset
+
+np.random.seed(0)        # Set a random seed for reproducibility
+
+t = np.arange(100)       # Create a time index: 0, 1, 2, ..., 99
+
+# Create synthetic time series data
+# Components:
+#  - Trend: 10 + 0.1*t (slowly increasing)
+#  - Seasonality: 2*sin(2πt/20) (oscillations every 20 steps)
+#  - Noise: random normal noise with mean 0 and std 0.5
+
+ts = 10 + 0.1 * t + 2 * np.sin(2 * np.pi * t / 20) + np.random.normal(0, 0.5, 100)
+
+# Store in DataFrame
+df = pd.DataFrame({'value': ts})
+
+
+# Calculate 10-period rolling mean (smooths out short-term fluctuations)
+df['SMA_10'] = df['value'].rolling(window=10).mean()
+
+# The expanding() function calculates cumulative mean up to each point
+df['CMA'] = df['value'].expanding().mean()
+
+# EMA gives higher weight to recent data (span=10 means moderate smoothing)
+df['EMA_10'] = df['value'].ewm(span=10, adjust=False).mean()
+
+# ARMA(1,1) Model Fitting
+# ARMA(1,1) is equivalent to ARIMA(1,0,1) — no differencing (0)
+try:
+    model = ARIMA(df['value'], order=(1, 0, 1)).fit()  # Fit ARMA model
+    df['ARMA_pred'] = model.fittedvalues                # Get fitted values (predicted)
+    arma_summary = model.params                         # Store model parameters (coefficients)
+except Exception as e:
+    arma_summary = f"ARMA failed: {e}"                 # If model fitting fails
+    df['ARMA_pred'] = np.nan                           # Fill predictions with NaN
+
+
+# Display first few rows and skewness of original series
+print("First 5 rows of time series with moving averages:")
+print(df.head(10).round(3))
+
+print("\nLast 5 rows (to see full averages):")
+print(df.tail().round(3))
+
+print("\nSkewness of original series:", df['value'].skew().round(4))
+
+print("\nARMA(1,1) model parameters:")
+print(arma_summary)
+plt.figure(figsize=(10,5))
+plt.plot(df['value'], label='Original Series', color='black')
+plt.plot(df['ARMA_pred'], label='ARMA(1,1) Fitted', color='red', alpha=0.7)
+plt.legend()
+plt.title("ARMA Model Fit")
+plt.show()
+
+
+
+
+
+	</pre>
+
+</body>
+</html>

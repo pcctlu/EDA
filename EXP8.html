@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<pre>
+
+import pandas as pd
+df = pd.read_csv('/content/Electric_Production.csv', parse_dates=['DATE'], index_col="DATE")
+print(df.head())
+
+print(df.dtypes)
+
+print(df.index)
+
+print(f"Time range from {df.index.min()} to {df.index.max()}")
+
+# Step 3: Time Resampling (Monthly Average)
+# Resampling aggregates the data into new time intervals — here 'M' means 'Monthly'
+# It calculates the average of values for each month
+
+df_resampled = df.resample('M').mean()
+
+print(df_resampled.head())
+
+# rolling(window=7) calculates a moving average over the last 7 observations (like a smoothing filter)
+df_rolling = df['IPG2211A2N'].rolling(window=7).mean()
+
+# Plot the rolling mean to visualize smooth trends
+df_rolling.plot(title="Rolling Mean (7-day window)")
+
+#Time series visualization
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(12,6))
+plt.plot(df.index, df['IPG2211A2N'], label="Original Data", color='blue')
+plt.plot(df.index, df_rolling, label="Rolling Mean (7-day)", color='red', linestyle='--')
+plt.xlabel('Date')
+plt.ylabel('Value')
+plt.title('Time Series Visualization with Rolling Mean')
+plt.legend()
+plt.show()
+
+
+
+
+
+
+	</pre>
+
+</body>
+</html>

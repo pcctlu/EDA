@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<pre>
+
+import pandas as pd
+
+# Load dataset
+df = pd.read_csv('/content/synthetic_dataset.csv')
+
+print(df.info())
+
+print("\nMissing values initially:\n", df.isnull().sum())
+df.head()
+
+# Remove duplicates
+df = df.drop_duplicates()
+
+print("\nAfter Removing Duplicates:")
+print(f"Shape: {df.shape}")
+
+print(df.head())
+
+# Impute missing values — Category
+if df['Category'].isnull().sum() > 0:
+    mode_category = df['Category'].mode()[0]
+    df['Category'] = df['Category'].fillna(mode_category)
+    print("\nAfter Imputing 'Category' with mode:")
+    print(df['Category'].value_counts())
+	
+	
+# Impute missing values — Price
+if df['Price'].isnull().sum() > 0:
+    mean_price = df['Price'].mean()
+    df['Price'] = df['Price'].fillna(mean_price)
+    print("\nAfter Imputing 'Price' with mean:")
+    print(df['Price'].describe())
+
+
+# Impute missing values — Rating
+if df['Rating'].isnull().sum() > 0:
+    median_rating = df['Rating'].median()
+    df['Rating'] = df['Rating'].fillna(median_rating)
+    print("\nAfter Imputing 'Rating' with median:")
+    print(df['Rating'].describe())
+
+
+# Impute missing values — Stock
+if df['Stock'].isnull().sum() > 0:
+    df['Stock'] = df['Stock'].fillna('Unknown')
+    print("\nAfter Imputing 'Stock' with 'Unknown':")
+    print(df['Stock'].value_counts())
+
+
+# Impute missing values — Discount
+if df['Discount'].isnull().sum() > 0:
+    df['Discount'] = df['Discount'].fillna(0)
+    print("\nAfter Imputing 'Discount' with 0:")
+    print(df['Discount'].describe())
+
+
+# Data type corrections
+df['Stock'] = df['Stock'].astype('category')
+df['Category'] = df['Category'].astype('category')
+print("\nAfter Converting 'Stock' and 'Category' to categorical:")
+print(df.dtypes)
+
+# Step 1: Calculate lower and upper quantile limits
+# Here, we take the 1st and 99th percentiles (0.01 and 0.99)
+
+q_low = df['Price'].quantile(0.01)
+q_high = df['Price'].quantile(0.99)
+
+# Step 2: Apply clipping
+# The .clip() function replaces:
+# - Any value below q_low → q_low
+# - Any value above q_high → q_high
+# - All other values remain unchanged
+df['Price'] = df['Price'].clip(lower=q_low, upper=q_high)
+print("\nAfter Clipping 'Price' outliers:")
+print(df['Price'].describe())
+
+
+
+# Final check for missing values
+print("\nFinal Missing Values:\n", df.isnull().sum())
+
+# Save cleaned dataset
+df.to_csv('synthetic_dataset_cleaned.csv', index=True)
+
+print("\nCleaned dataset saved as 'synthetic_dataset_cleaned.csv'")
+
+
+
+
+
+
+	</pre>
+
+</body>
+</html>
